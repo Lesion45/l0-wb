@@ -1,13 +1,18 @@
 package cache
 
 import (
+	"errors"
 	"sync"
+)
+
+var (
+	ErrKeyAlreadyExists = errors.New("given key already exists")
 )
 
 // The Cache interface defines the methods required for caching.
 type Cache interface {
 	Get(key string) (interface{}, bool)
-	Set(key string, value interface{})
+	Set(key string, value interface{}) error
 	Delete(key string)
 }
 
@@ -43,13 +48,20 @@ func (m *memoryCache) Get(key string) (interface{}, bool) {
 }
 
 // Set adds a value in the cache with a key.
-func (m *memoryCache) Set(key string, value interface{}) {
+func (m *memoryCache) Set(key string, value interface{}) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+
+	_, exists := m.store[key]
+	if !exists {
+		return ErrKeyAlreadyExists
+	}
 
 	m.store[key] = item{
 		value: value,
 	}
+
+	return nil
 }
 
 // Delete removes a key-value pair from the cache.
