@@ -1,8 +1,13 @@
-package model
+package broker
 
 import (
 	"time"
 )
+
+//
+// The structures below are only used to validate messages from Kafka.
+// They are not used to transfer between layers, but this could easily be changed in the future.
+//
 
 // Order provides main information about order's structure.
 type Order struct {
