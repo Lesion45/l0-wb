@@ -13,6 +13,7 @@ import (
 type Order interface {
 	GetOrder(ctx context.Context, id string) (json.RawMessage, error)
 	SaveOrder(ctx context.Context, id string, data json.RawMessage) error
+	LoadOrdersToCache(ctx context.Context) error
 }
 
 // Services aggregates all application service interfaces.

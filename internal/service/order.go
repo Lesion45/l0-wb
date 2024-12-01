@@ -113,3 +113,41 @@ func (s *OrderService) GetOrder(ctx context.Context, id string) (json.RawMessage
 
 	return order.Data, nil
 }
+
+func (s *OrderService) LoadOrdersToCache(ctx context.Context) error {
+	const op = "service.OrderService.GetAllOrders"
+	s.Log.With(
+		zap.String("op", op),
+	)
+
+	s.Log.Info("Attempting to fetch orders")
+
+	orders, err := s.Repo.GetAllOrders(ctx)
+	if err != nil {
+		if errors.Is(err, pgdb.ErrOrderNotFound) {
+			s.Log.Warn("Orders not found",
+				zap.Error(err),
+			)
+
+			return fmt.Errorf("%s: %w", op, ErrOrderNotFound)
+		}
+
+		s.Log.Error("Failed to get orders",
+			zap.Error(err),
+		)
+
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	counter := 0
+	for _, order := range orders {
+		err := s.Cache.Set(order.UID, order.Data)
+		if err != nil {
+			continue
+		}
+		counter++
+	}
+
+	s.Log.Info(fmt.Sprintf("Orders were loaded to the cache: %d/%d", len(orders), counter))
+
+	return nil
+}
