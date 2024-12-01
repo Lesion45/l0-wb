@@ -3,15 +3,9 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"wb-internship-l0/internal/entity"
 	postgres "wb-internship-l0/internal/lib/pg"
 	"wb-internship-l0/internal/repository/pgdb"
-)
-
-var (
-	ErrOrderAlreadyExists = errors.New("order already exists")
-	ErrOrderNotFound      = errors.New("order not found")
 )
 
 // Order defines an interface for order-related operations.

@@ -9,7 +9,11 @@ import (
 	"github.com/jackc/pgx/v5/pgconn"
 	"wb-internship-l0/internal/entity"
 	postgres "wb-internship-l0/internal/lib/pg"
-	"wb-internship-l0/internal/repository"
+)
+
+var (
+	ErrOrderAlreadyExists = errors.New("order already exists")
+	ErrOrderNotFound      = errors.New("order not found")
 )
 
 // OrderRepository is a repository for managing orders in the database.
@@ -37,7 +41,7 @@ func (r *OrderRepository) AddOrder(ctx context.Context, id string, data json.Raw
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
-			return fmt.Errorf("%s: %w", op, repository.ErrOrderAlreadyExists)
+			return fmt.Errorf("%s: %w", op, ErrOrderAlreadyExists)
 		}
 		return fmt.Errorf("%s: %w", op, err)
 	}
@@ -59,7 +63,7 @@ func (r *OrderRepository) GetOrder(ctx context.Context, id string) (entity.Order
 	err := r.DB.QueryRow(ctx, query, args).Scan(&data)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return entity.Order{}, fmt.Errorf("%s: %w", op, repository.ErrOrderNotFound)
+			return entity.Order{}, fmt.Errorf("%s: %w", op, ErrOrderNotFound)
 		}
 
 		return entity.Order{}, fmt.Errorf("%s: %w", op, err)
