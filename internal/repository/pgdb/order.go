@@ -76,3 +76,38 @@ func (r *OrderRepository) GetOrder(ctx context.Context, id string) (entity.Order
 
 	return order, nil
 }
+
+func (r *OrderRepository) GetAllOrders(ctx context.Context) ([]entity.Order, error) {
+	const op = "repository.order.GetAllOrders"
+
+	query := `SELECT OrderID, Data FROM orders_schema.order`
+
+	rows, err := r.DB.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	defer rows.Close()
+
+	var orders []entity.Order
+
+	for rows.Next() {
+		var id string
+		var data json.RawMessage
+
+		if err := rows.Scan(&id, &data); err != nil {
+			return nil, fmt.Errorf("%s: %w", op, err)
+		}
+
+		order := entity.Order{
+			UID:  id,
+			Data: data,
+		}
+		orders = append(orders, order)
+	}
+
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("%s: %w", op, rows.Err())
+	}
+
+	return orders, nil
+}

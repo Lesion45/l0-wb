@@ -12,6 +12,7 @@ import (
 type Order interface {
 	AddOrder(ctx context.Context, id string, data json.RawMessage) error
 	GetOrder(ctx context.Context, id string) (entity.Order, error)
+	GetAllOrders(ctx context.Context) ([]entity.Order, error)
 }
 
 // Repositories is a struct that aggregates various repositories.
