@@ -14,7 +14,7 @@ import (
 // Consumer defines an interface for various consumer implementations.
 type Consumer interface {
 	Listen(ctx context.Context) error
-	Close() error
+	Shutdown() error
 }
 
 // KafkaConsumer is an implementation of the Consumer interface for Kafka.
@@ -25,12 +25,11 @@ type KafkaConsumer struct {
 }
 
 // NewKafkaConsumer return a new instance of KafkaConsumer with the given configuration.
-func NewKafkaConsumer(log *zap.Logger, services *service.Services, brokers []string, groupID string, topic string) *KafkaConsumer {
+func NewKafkaConsumer(log *zap.Logger, services *service.Services, brokers []string, topic string) *KafkaConsumer {
 	return &KafkaConsumer{
 		log: log,
 		reader: kafka.NewReader(kafka.ReaderConfig{
 			Brokers: brokers,
-			GroupID: groupID,
 			Topic:   topic,
 		}),
 		service: services.Order,
@@ -51,9 +50,10 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 			if errors.Is(err, context.Canceled) {
 				k.log.Info("Consumer context canceled")
 
-				return nil
+				return err
 			}
 
+			// TODO: FIX PROBLEM: IT SPAMS MESSAGE WHEN KAFKA CONTAINER IS OPENING
 			k.log.Error("Failed to receive message from Kafka",
 				zap.Error(err),
 			)
@@ -72,7 +72,9 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 
 		err = json.Unmarshal(msg.Value, &order)
 		if err != nil {
-			k.log.Error("Failed to unmarshal data")
+			k.log.Error("Failed to unmarshal data",
+				zap.Error(err),
+			)
 
 			continue
 		}
@@ -92,11 +94,28 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 			k.log.Error("unexpected error",
 				zap.Error(err),
 			)
+
+			continue
+		}
+
+		if err := k.reader.CommitMessages(ctx, msg); err != nil {
+			k.log.Error("Failed to commit message",
+				zap.Error(err),
+			)
 		}
 	}
 }
 
-// Close shuts down the Kafka reader and releases resources.
-func (k *KafkaConsumer) Close() error {
-	return k.reader.Close()
+// Shutdown shuts down the Kafka reader and releases resources.
+func (k *KafkaConsumer) Shutdown() {
+	k.log.Info("Closing Kafka reader...")
+	if err := k.reader.Close(); err != nil {
+		k.log.Error("Failed to close Kafka reader",
+			zap.Error(err),
+		)
+		return
+	} else {
+		k.log.Info("Kafka reader closed")
+	}
+	return
 }
