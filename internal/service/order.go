@@ -17,12 +17,14 @@ var (
 	ErrCache              = errors.New("failed to save order in cache")
 )
 
+// OrderService provides methods to manage orders.
 type OrderService struct {
 	Log   *zap.Logger
 	Cache cache.Cache
 	Repo  repository.Order
 }
 
+// NewOrderService initializes and returns a new OrderService.
 func NewOrderService(log *zap.Logger, cache cache.Cache, repo repository.Order) *OrderService {
 	return &OrderService{
 		Log:   log,
@@ -31,6 +33,7 @@ func NewOrderService(log *zap.Logger, cache cache.Cache, repo repository.Order) 
 	}
 }
 
+// SaveOrder saves a new order to the database and cache.
 func (s *OrderService) SaveOrder(ctx context.Context, id string, data json.RawMessage) error {
 	const op = "service.OrderService.SaveOrder"
 	s.Log.With(
@@ -74,6 +77,7 @@ func (s *OrderService) SaveOrder(ctx context.Context, id string, data json.RawMe
 	return nil
 }
 
+// GetOrder retrieves an order by its ID, checking the cache first.
 func (s *OrderService) GetOrder(ctx context.Context, id string) (json.RawMessage, error) {
 	const op = "service.OrderService.GetOrder"
 	s.Log.With(
