@@ -19,9 +19,9 @@ func NewZap(logLevel string) *zap.Logger {
 
 	switch logLevel {
 	case logDev:
-		log = zap.Must(zap.NewDevelopment())
+		log = zap.Must(zap.NewDevelopment(zap.WithCaller(false)))
 	case logProd:
-		log = zap.Must(zap.NewProduction())
+		log = zap.Must(zap.NewProduction(zap.WithCaller(false)))
 	default:
 		log = zap.Must(zap.NewDevelopment())
 	}
