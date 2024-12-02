@@ -13,6 +13,8 @@ services:
         condition: service_started
       db:
         condition: service_healthy
+      zookeeper:
+        condition: service_started
     networks:
       - app_network
     restart: on-failure

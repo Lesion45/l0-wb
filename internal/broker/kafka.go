@@ -51,8 +51,7 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 				return err
 			}
 
-			// TODO: FIX PROBLEM: IT SPAMS MESSAGE WHEN KAFKA CONTAINER IS OPENING
-			k.log.Error("Failed to receive message from Kafka",
+			k.log.Error("Unexpected error",
 				zap.String("op", op),
 				zap.Error(err),
 			)
@@ -82,7 +81,7 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 		if err := validator.New().Struct(order); err != nil {
 			validateErr := err.(validator.ValidationErrors)
 
-			k.log.Error("invalid data",
+			k.log.Error("Invalid data",
 				zap.String("op", op),
 				zap.Error(validateErr),
 			)
@@ -92,7 +91,7 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 
 		err = k.service.SaveOrder(ctx, order.OrderUID, msg.Value)
 		if err != nil {
-			k.log.Error("unexpected error",
+			k.log.Error("Unexpected error",
 				zap.String("op", op),
 				zap.Error(err),
 			)
