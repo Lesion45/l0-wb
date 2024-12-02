@@ -23,10 +23,13 @@ func Run() {
 
 	// Logger init
 	log := logger.NewZap(cfg.Env)
-	log.With(zap.String("env", cfg.Env))
+	defer log.Sync()
+
+	// Context
+	ctx, cancel := context.WithCancel(context.Background())
 
 	// Database init
-	pg := database.NewPostgres(context.Background(), log, cfg.PgDSN)
+	pg := database.NewPostgres(ctx, log, cfg.PgDSN)
 
 	// Cache init
 	memoryCache := cache.NewMemoryCache()
@@ -43,15 +46,12 @@ func Run() {
 	services := service.NewServices(deps)
 
 	// Restore cache
-	err := services.Order.LoadOrdersToCache(context.Background())
+	err := services.Order.LoadOrdersToCache(ctx)
 	if err != nil {
 		log.Warn("Failed to restore cache",
 			zap.Error(err),
 		)
 	}
-
-	// Context
-	ctx, cancel := context.WithCancel(context.Background())
 
 	// Channel for signals
 	quit := make(chan os.Signal, 1)

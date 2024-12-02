@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import "wb-internship-l0/internal/app"
 
