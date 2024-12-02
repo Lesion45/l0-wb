@@ -31,6 +31,8 @@ type Postgres struct {
 }
 
 func NewPostgres(ctx context.Context, log *zap.Logger, dsn string) *Postgres {
+	const op = "database.NewPostgres"
+
 	var (
 		pgInstance *Postgres
 		pgOnce     sync.Once
@@ -39,7 +41,10 @@ func NewPostgres(ctx context.Context, log *zap.Logger, dsn string) *Postgres {
 	pgOnce.Do(func() {
 		db, err := pgxpool.New(ctx, dsn)
 		if err != nil {
-			log.Fatal("Unable to connect to database", zap.Error(err))
+			log.Fatal("Unable to connect to database",
+				zap.String("op", op),
+				zap.Error(err),
+			)
 		}
 
 		pgInstance = &Postgres{

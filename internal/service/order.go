@@ -14,7 +14,6 @@ import (
 var (
 	ErrOrderAlreadyExists = errors.New("order already exists")
 	ErrOrderNotFound      = errors.New("order not found")
-	ErrCache              = errors.New("failed to save order in cache")
 )
 
 // OrderService provides methods to manage orders.
@@ -36,9 +35,6 @@ func NewOrderService(log *zap.Logger, cache cache.Cache, repo repository.Order) 
 // SaveOrder saves a new order to the database and cache.
 func (s *OrderService) SaveOrder(ctx context.Context, id string, data json.RawMessage) error {
 	const op = "service.OrderService.SaveOrder"
-	s.Log.With(
-		zap.String("op", op),
-	)
 
 	s.Log.Info("Attempting to save order")
 
@@ -46,6 +42,7 @@ func (s *OrderService) SaveOrder(ctx context.Context, id string, data json.RawMe
 	if err != nil {
 		if errors.Is(err, pgdb.ErrOrderAlreadyExists) {
 			s.Log.Warn("Order already exists",
+				zap.String("op", op),
 				zap.String("orderID", id),
 			)
 
@@ -53,6 +50,7 @@ func (s *OrderService) SaveOrder(ctx context.Context, id string, data json.RawMe
 		}
 
 		s.Log.Error("Failed to save order to database",
+			zap.String("op", op),
 			zap.String("orderID", id),
 			zap.Error(err),
 		)
@@ -65,6 +63,7 @@ func (s *OrderService) SaveOrder(ctx context.Context, id string, data json.RawMe
 	err = s.Cache.Set(id, data)
 	if err != nil {
 		s.Log.Warn("Failed to save order to cache",
+			zap.String("op", op),
 			zap.String("orderID", id),
 			zap.Error(err),
 		)
@@ -80,9 +79,6 @@ func (s *OrderService) SaveOrder(ctx context.Context, id string, data json.RawMe
 // GetOrder retrieves an order by its ID, checking the cache first.
 func (s *OrderService) GetOrder(ctx context.Context, id string) (json.RawMessage, error) {
 	const op = "service.OrderService.GetOrder"
-	s.Log.With(
-		zap.String("op", op),
-	)
 
 	s.Log.Info("Attempting to found order")
 
@@ -95,6 +91,7 @@ func (s *OrderService) GetOrder(ctx context.Context, id string) (json.RawMessage
 	if err != nil {
 		if errors.Is(err, pgdb.ErrOrderNotFound) {
 			s.Log.Warn("Order not found",
+				zap.String("op", op),
 				zap.String("orderID", id),
 				zap.Error(err),
 			)
@@ -103,6 +100,7 @@ func (s *OrderService) GetOrder(ctx context.Context, id string) (json.RawMessage
 		}
 
 		s.Log.Error("Failed to get order",
+			zap.String("op", op),
 			zap.Error(err),
 		)
 
@@ -116,9 +114,6 @@ func (s *OrderService) GetOrder(ctx context.Context, id string) (json.RawMessage
 
 func (s *OrderService) LoadOrdersToCache(ctx context.Context) error {
 	const op = "service.OrderService.GetAllOrders"
-	s.Log.With(
-		zap.String("op", op),
-	)
 
 	s.Log.Info("Attempting to fetch orders")
 
@@ -126,6 +121,7 @@ func (s *OrderService) LoadOrdersToCache(ctx context.Context) error {
 	if err != nil {
 		if errors.Is(err, pgdb.ErrOrderNotFound) {
 			s.Log.Warn("Orders not found",
+				zap.String("op", op),
 				zap.Error(err),
 			)
 
@@ -133,6 +129,7 @@ func (s *OrderService) LoadOrdersToCache(ctx context.Context) error {
 		}
 
 		s.Log.Error("Failed to get orders",
+			zap.String("op", op),
 			zap.Error(err),
 		)
 
@@ -147,7 +144,7 @@ func (s *OrderService) LoadOrdersToCache(ctx context.Context) error {
 		counter++
 	}
 
-	s.Log.Info(fmt.Sprintf("Orders were loaded to the cache: %d/%d", len(orders), counter))
+	s.Log.Info(fmt.Sprintf("Cache restored: %d/%d", len(orders), counter))
 
 	return nil
 }

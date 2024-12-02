@@ -27,11 +27,13 @@ type Request struct {
 }
 
 func (r *orderRoutes) getOrder(c *fiber.Ctx) error {
+	const op = "v1.orderRoutes.getOrder"
+
 	var req Request
 
 	if err := c.BodyParser(&req); err != nil {
-		r.log.Error("failed to get order_id from request",
-			zap.String("op", "v1.orderRoutes.getOrder"),
+		r.log.Error("failed to get order_uid from request",
+			zap.String("op", op),
 			zap.String("route", "api/v1/get_order"),
 			zap.Error(err),
 		)
@@ -43,7 +45,7 @@ func (r *orderRoutes) getOrder(c *fiber.Ctx) error {
 	if err != nil {
 		if errors.Is(err, service.ErrOrderNotFound) {
 			r.log.Warn("order not found",
-				zap.String("op", "v1.orderRoutes.getOrder"),
+				zap.String("op", op),
 				zap.String("route", "api/v1/get_order"),
 				zap.String("orderID", req.ID),
 				zap.Error(err),
@@ -53,7 +55,7 @@ func (r *orderRoutes) getOrder(c *fiber.Ctx) error {
 		}
 
 		r.log.Error("failed to get order",
-			zap.String("op", "v1.orderRoutes.getOrder"),
+			zap.String("op", op),
 			zap.String("route", "api/v1/get_order"),
 			zap.String("orderID", req.ID),
 			zap.Error(err),
