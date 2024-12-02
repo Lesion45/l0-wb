@@ -35,7 +35,7 @@ type Delivery struct {
 	City    string `json:"city" validate:"required"`
 	Address string `json:"address" validate:"required"`
 	Region  string `json:"region" validate:"required"`
-	Email   string `json:"email" validate:"required,email"`
+	Email   string `json:"email" validate:"required"`
 }
 
 // Payment provides information about payment.
