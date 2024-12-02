@@ -1,0 +1,75 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: app
+    build: ./
+    ports:
+      - "3000:3000"
+    env_file:
+      - secrets.env
+    depends_on:
+      kafka:
+        condition: service_started
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+    restart: on-failure
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    ports:
+      - "2181:2181"
+    env_file:
+      - secrets.env
+    networks:
+      - app_network
+    restart: on-failure
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    env_file:
+      - secrets.env
+    networks:
+      - app_network
+    restart: on-failure
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile-migrator
+    container_name: migrate
+    command: [ "up" ]
+    env_file:
+      - secrets.env
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  db:
+    image: postgres:latest
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
+    ports:
+      - 5432:5432
+    container_name: postgres
+    env_file:
+      - secrets.env
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: on-failure
+
+networks:
+  app_network:
+    driver: bridge
