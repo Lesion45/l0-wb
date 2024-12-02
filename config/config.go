@@ -12,8 +12,8 @@ type Config struct {
 }
 
 type Kafka struct {
-	Host  string `env:"CONFIG_KAFKA_HOST,required"`
-	Topic string `env:"CONFIG_KAFKA_TOPIC,required"`
+	Host  string `env:"BROKER_HOST,required"`
+	Topic string `env:"BROKER_TOPIC,required"`
 }
 
 // MustLoad loads configuration from config.yaml
