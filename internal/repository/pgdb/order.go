@@ -56,7 +56,7 @@ func (r *OrderRepository) GetOrder(ctx context.Context, id string) (entity.Order
 
 	var data json.RawMessage
 
-	query := `SELECT OrderID, Data FROM orders_schema.order WHERE id = @id`
+	query := `SELECT Data FROM orders_schema.order WHERE OrderID = @id`
 	args := pgx.NamedArgs{
 		"id": id,
 	}
