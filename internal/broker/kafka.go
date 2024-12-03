@@ -119,5 +119,6 @@ func (k *KafkaConsumer) Shutdown() {
 	} else {
 		k.log.Info("Kafka reader closed")
 	}
+
 	return
 }
