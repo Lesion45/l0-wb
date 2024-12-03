@@ -101,7 +101,7 @@ func Run() {
 	log.Info("Shutdown signal received")
 	cancel()
 
-	kafka.Shutdown()
+	err = kafka.Shutdown()
 
 	if err := app.Shutdown(); err != nil {
 		log.Error("Error shutting down Fiber",

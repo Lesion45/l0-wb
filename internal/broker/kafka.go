@@ -48,7 +48,7 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 			if errors.Is(err, context.Canceled) {
 				k.log.Info("Consumer context canceled")
 
-				return err
+				return nil
 			}
 
 			continue
@@ -101,12 +101,10 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 			)
 		}
 	}
-
-	return nil
 }
 
 // Shutdown shuts down the Kafka reader and releases resources.
-func (k *KafkaConsumer) Shutdown() {
+func (k *KafkaConsumer) Shutdown() error {
 	const op = "broker.KafkaConsumer.Shutdown"
 
 	k.log.Info("Closing Kafka reader...")
@@ -115,10 +113,10 @@ func (k *KafkaConsumer) Shutdown() {
 			zap.String("op", op),
 			zap.Error(err),
 		)
-		return
+		return err
 	} else {
 		k.log.Info("Kafka reader closed")
 	}
 
-	return
+	return nil
 }
