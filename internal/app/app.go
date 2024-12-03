@@ -102,6 +102,9 @@ func Run() {
 	cancel()
 
 	err = kafka.Shutdown()
+	if err != nil {
+		log.Error("Failed to close Kafka")
+	}
 
 	if err := app.Shutdown(); err != nil {
 		log.Error("Error shutting down Fiber",
