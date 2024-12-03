@@ -3,9 +3,11 @@ package v1
 import (
 	"context"
 	"errors"
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"go.uber.org/zap"
 	"wb-internship-l0/internal/service"
+	"wb-internship-l0/pkg/validation"
 )
 
 type orderRoutes struct {
@@ -23,7 +25,7 @@ func newRoutes(log *zap.Logger, g *fiber.Router, orderService service.Order) {
 }
 
 type Request struct {
-	ID string `json:"order_uid"`
+	ID string `json:"order_uid" validate:"required"`
 }
 
 func (r *orderRoutes) getOrder(c *fiber.Ctx) error {
@@ -32,13 +34,26 @@ func (r *orderRoutes) getOrder(c *fiber.Ctx) error {
 	var req Request
 
 	if err := c.BodyParser(&req); err != nil {
-		r.log.Error("failed to get order_uid from request",
+		r.log.Error("failed to decode request body",
 			zap.String("op", op),
 			zap.String("route", "api/v1/get_order"),
 			zap.Error(err),
 		)
 
 		return c.SendStatus(fiber.StatusBadRequest)
+	}
+
+	r.log.Info("request body decoded")
+	if err := validator.New().Struct(req); err != nil {
+		validateErr := err.(validator.ValidationErrors)
+		r.log.Error("invalid request",
+			zap.String("op", op),
+			zap.Error(err),
+		)
+
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"errors": validation.ValidataionError(validateErr),
+		})
 	}
 
 	data, err := r.orderService.GetOrder(context.Background(), req.ID)
