@@ -44,7 +44,7 @@ Endpoint: `api/v1/get_order`, Method: `GET`, Content-type: `application/json`
 curl --location --request GET 'http://localhost:3000/api/v1/get_order' \
 --header 'Content-Type: application/json' \
 --data-raw '{ \
-    "order_uid": "2c220c36-6d64-40ae-9ae2-8b8631208d4d"
+    "order_uid": "b563feb7b2b84b6test"
 }'
 ```
 #### Response
@@ -99,5 +99,10 @@ curl --location --request GET 'http://localhost:3000/api/v1/get_order' \
    "oof_shard": "1"
 }
 ```
+## Benchmarks
+Бенчмарк проводился при помощи утилиты Vegeta и выдал следующие результаты
+
+![Logo](vegeta-plot.png)
+
 ## Author
 * [Lesion45](https://github.com/Lesion45)
