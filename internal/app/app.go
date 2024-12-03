@@ -25,7 +25,6 @@ func Run() {
 
 	// Logger init
 	log := logger.NewZap(cfg.Env)
-	defer log.Sync()
 
 	// Context
 	ctx, cancel := context.WithCancel(context.Background())

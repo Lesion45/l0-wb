@@ -15,7 +15,7 @@ func ValidataionError(errs validator.ValidationErrors) string {
 			errsMsgs = append(errsMsgs, fmt.Sprintf("%s is a required", err.Field()))
 
 		default:
-			errsMsgs = append(errsMsgs, fmt.Sprintf("field %s is not valid"))
+			errsMsgs = append(errsMsgs, fmt.Sprintf("field %s is not valid", err.Field()))
 		}
 	}
 

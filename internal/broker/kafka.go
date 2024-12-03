@@ -101,6 +101,8 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 			)
 		}
 	}
+
+	return nil
 }
 
 // Shutdown shuts down the Kafka reader and releases resources.
