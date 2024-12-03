@@ -53,7 +53,7 @@ func (m *memoryCache) Set(key string, value interface{}) error {
 	defer m.mu.Unlock()
 
 	_, exists := m.store[key]
-	if !exists {
+	if exists {
 		return ErrKeyAlreadyExists
 	}
 

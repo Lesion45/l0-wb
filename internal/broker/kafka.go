@@ -51,11 +51,6 @@ func (k *KafkaConsumer) Listen(ctx context.Context) error {
 				return err
 			}
 
-			k.log.Error("Unexpected error",
-				zap.String("op", op),
-				zap.Error(err),
-			)
-
 			continue
 		}
 

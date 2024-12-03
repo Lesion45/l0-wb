@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+	"github.com/gofiber/contrib/fiberzap/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"go.uber.org/zap"
 	"os"
 	"os/signal"
@@ -82,6 +84,10 @@ func Run() {
 	app := fiber.New(fiber.Config{
 		AppName: "WB-INTERNSHIP-L0",
 	})
+	app.Use(recover.New())
+	app.Use(fiberzap.New(fiberzap.Config{
+		Logger: log,
+	}))
 	v1.InitRouter(log, app, services)
 	go func() {
 		if err := app.Listen(":3000"); err != nil {
